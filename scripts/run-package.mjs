@@ -1,4 +1,6 @@
 import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { preparePackage } from "./prepare-package.mjs";
 
 const mode = process.argv[2];
@@ -8,13 +10,14 @@ const profile = preparePackage();
 const cargoBin = `${process.env.USERPROFILE ?? ""}\\.cargo\\bin`;
 process.env.PATH = `${cargoBin};${process.env.PATH ?? ""}`;
 
-const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-const args = ["tauri", mode, "--config", "src-tauri/.generated/tauri.profile.conf.json"];
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const tauriCli = resolve(root, "node_modules", "@tauri-apps", "cli", "tauri.js");
+const args = [tauriCli, mode, "--config", "src-tauri/.generated/tauri.profile.conf.json"];
 if (mode === "build") args.push("--target", profile.rustTarget);
 
 console.log(`开始 ${mode}：${profile.title} / ${profile.target}`);
-console.log(`执行命令：${npx} ${args.join(" ")}`);
-const result = spawnSync(npx, args, { stdio: "inherit", env: process.env });
+console.log(`执行命令：${process.execPath} ${args.join(" ")}`);
+const result = spawnSync(process.execPath, args, { stdio: "inherit", env: process.env });
 if (result.error) {
   throw new Error(`无法启动 Tauri CLI：${result.error.message}`);
 }

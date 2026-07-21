@@ -100,8 +100,8 @@ function prepareIcon(profile) {
     return;
   }
 
-  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
-  execFileSync(npx, ["tauri", "icon", profile.iconPath, "--output", iconDirectory], {
+  const tauriCli = resolve(root, "node_modules", "@tauri-apps", "cli", "tauri.js");
+  execFileSync(process.execPath, [tauriCli, "icon", profile.iconPath, "--output", iconDirectory], {
     cwd: root,
     stdio: "inherit"
   });
