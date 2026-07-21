@@ -46,14 +46,16 @@
   "minWidth": 1024,
   "minHeight": 680,
   "resizable": true,
-  "fullscreen": true
+  "fullscreen": false,
+  "maximized": true
 }
 ```
 
-无需在 profile 中重复填写。若某个产品需要不同窗口行为，可添加 `window` 并只覆盖需要改变的字段，例如以普通窗口启动：
+无需在 profile 中重复填写。默认会最大化启动，但保留标题栏、最小化/最大化/还原按钮；退出最大化后可按最小尺寸调整窗口。若某个产品需要不同窗口行为，可添加 `window` 并只覆盖需要改变的字段，例如以普通窗口启动：
 
 ```json
 "window": {
+  "maximized": false,
   "fullscreen": false,
   "width": 1280,
   "height": 800

@@ -25,7 +25,7 @@ function loadWindowSettings(value) {
   for (const field of ["width", "height", "minWidth", "minHeight"]) {
     if (typeof window[field] !== "number" || window[field] <= 0) fail(`window.${field} 必须为正数`);
   }
-  for (const field of ["resizable", "fullscreen"]) {
+  for (const field of ["resizable", "fullscreen", "maximized"]) {
     if (typeof window[field] !== "boolean") fail(`window.${field} 必须为布尔值`);
   }
   return window;

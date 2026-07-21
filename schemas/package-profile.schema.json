@@ -42,7 +42,8 @@
         "minWidth": { "type": "number", "exclusiveMinimum": 0 },
         "minHeight": { "type": "number", "exclusiveMinimum": 0 },
         "resizable": { "type": "boolean" },
-        "fullscreen": { "type": "boolean" }
+        "fullscreen": { "type": "boolean" },
+        "maximized": { "type": "boolean" }
       }
     }
   }

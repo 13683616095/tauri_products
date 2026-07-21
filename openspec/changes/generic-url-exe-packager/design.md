@@ -37,6 +37,10 @@ Tauri 的窗口 URL、标题和 bundle 图标属于编译期配置，不能由�
 
 GitHub 的 Windows Runner 按选择安装 Rust 目标并执行构建。产物路径与名称必须含目标架构，避免混淆。
 
+## 默认窗口行为
+
+默认 profile 以最大化模式启动（`maximized: true`、`fullscreen: false`），保留 Windows 标题栏及最小化、最大化、还原和关闭操作。用户退出最大化后，窗口遵循 profile 的宽高、最小尺寸和 `resizable` 设置。
+
 ## 云端提交安全
 
 GitHub Actions 的手动输入无法安全传输二进制图标文件。完整的表单提交功能需要以下两种之一：
