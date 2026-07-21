@@ -1,0 +1,13 @@
+{
+  "name": "aimanju-zhizuo-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI漫剧创作 Windows 桌面封装",
+  "scripts": {
+    "dev": "set \"PATH=%USERPROFILE%\\.cargo\\bin;%PATH%\" && tauri dev",
+    "build": "set \"PATH=%USERPROFILE%\\.cargo\\bin;%PATH%\" && tauri build --target x86_64-pc-windows-msvc"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}
