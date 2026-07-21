@@ -55,6 +55,23 @@ jobs:
       - name: Build Windows x64 installer
         run: npm run build
 
+      - name: Diagnose packaging inputs on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          Write-Host "PACKAGE_PROFILE=$env:PACKAGE_PROFILE"
+          Write-Host "PACKAGE_ARCH=$env:PACKAGE_ARCH"
+          if (Test-Path $env:PACKAGE_PROFILE) {
+            Write-Host 'Profile content:'
+            Get-Content -Raw $env:PACKAGE_PROFILE
+          } else {
+            Write-Error 'Profile file does not exist in the checked-out repository.'
+          }
+          if (Test-Path 'src-tauri/.generated/tauri.profile.conf.json') {
+            Write-Host 'Generated Tauri config:'
+            Get-Content -Raw 'src-tauri/.generated/tauri.profile.conf.json'
+          }
+
       - name: Create distributable and checksum
         shell: pwsh
         run: |
