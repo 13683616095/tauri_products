@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/package-profile.schema.json",
+  "title": "AI漫剧创作",
+  "url": "https://aimanjuzhizuo.com?ly=360",
+  "icon": "../src-tauri/icons/icon.ico",
+  "identifier": "com.aimanju.zhizuo",
+  "version": "0.1.0",
+  "target": "x64"
+}

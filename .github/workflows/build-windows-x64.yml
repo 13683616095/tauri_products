@@ -2,6 +2,20 @@ name: Build Windows x64 installer
 
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "Profile 文件路径（相对仓库根目录）"
+        required: true
+        default: "profiles/aimanju.json"
+        type: string
+      architecture:
+        description: "目标 Windows 架构"
+        required: true
+        default: "x64"
+        type: choice
+        options:
+          - x64
+          - x86
   push:
     tags:
       - "v*"
@@ -12,6 +26,9 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
+    env:
+      PACKAGE_PROFILE: ${{ inputs.profile || 'profiles/aimanju.json' }}
+      PACKAGE_ARCH: ${{ inputs.architecture || 'x64' }}
 
     steps:
       - name: Check out source
@@ -26,8 +43,14 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm ci
 
-      - name: Ensure Rust x64 MSVC target
-        run: rustup target add x86_64-pc-windows-msvc
+      - name: Ensure selected Rust target
+        shell: pwsh
+        run: |
+          if ($env:PACKAGE_ARCH -eq 'x86') {
+            rustup target add i686-pc-windows-msvc
+          } else {
+            rustup target add x86_64-pc-windows-msvc
+          }
 
       - name: Build Windows x64 installer
         run: npm run build
@@ -35,7 +58,8 @@ jobs:
       - name: Create distributable and checksum
         shell: pwsh
         run: |
-          $installer = Get-ChildItem 'src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis' -Filter '*.exe' | Select-Object -First 1
+          $rustTarget = if ($env:PACKAGE_ARCH -eq 'x86') { 'i686-pc-windows-msvc' } else { 'x86_64-pc-windows-msvc' }
+          $installer = Get-ChildItem "src-tauri/target/$rustTarget/release/bundle/nsis" -Filter '*.exe' | Select-Object -First 1
           if ($null -eq $installer) { throw 'NSIS installer was not generated.' }
           New-Item -ItemType Directory -Force -Path 'artifacts' | Out-Null
           Copy-Item $installer.FullName -Destination 'artifacts'
@@ -46,7 +70,7 @@ jobs:
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AI漫剧创作-windows-x64-nsis
+          name: url-exe-windows-${{ inputs.architecture || 'x64' }}-nsis
           path: artifacts/
           if-no-files-found: error
           retention-days: 90
@@ -63,7 +87,7 @@ jobs:
       - name: Download installer artifact
         uses: actions/download-artifact@v4
         with:
-          name: AI漫剧创作-windows-x64-nsis
+          name: url-exe-windows-${{ inputs.architecture || 'x64' }}-nsis
           path: release
 
       - name: Create GitHub Release

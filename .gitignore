@@ -2,3 +2,4 @@ node_modules/
 src-tauri/target/
 build-stdout.log
 build-stderr.log
+src-tauri/.generated/

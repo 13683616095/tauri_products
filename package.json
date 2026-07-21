@@ -4,8 +4,9 @@
   "private": true,
   "description": "AI漫剧创作 Windows 桌面封装",
   "scripts": {
-    "dev": "set \"PATH=%USERPROFILE%\\.cargo\\bin;%PATH%\" && tauri dev",
-    "build": "set \"PATH=%USERPROFILE%\\.cargo\\bin;%PATH%\" && tauri build --target x86_64-pc-windows-msvc"
+    "prepare-package": "node scripts/prepare-package.mjs",
+    "dev": "node scripts/run-package.mjs dev",
+    "build": "node scripts/run-package.mjs build"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0"

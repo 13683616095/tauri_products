@@ -1,0 +1,18 @@
+{
+  "format": "url-exe-profile-history/v1",
+  "entries": [
+    {
+      "recordedAt": "2026-07-21",
+      "source": "profiles/aimanju.json",
+      "change": "Initial standardized profile snapshot",
+      "profile": {
+        "title": "AI漫剧创作",
+        "url": "https://aimanjuzhizuo.com?ly=360",
+        "icon": "../src-tauri/icons/icon.ico",
+        "identifier": "com.aimanju.zhizuo",
+        "version": "0.1.0",
+        "target": "x64"
+      }
+    }
+  ]
+}

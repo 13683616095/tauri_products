@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "URL EXE 打包配置",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "url", "icon", "identifier"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "\\.(png|ico)$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$",
+      "default": "0.1.0"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["x64", "x86"],
+      "default": "x64"
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "minWidth": { "type": "number", "exclusiveMinimum": 0 },
+        "minHeight": { "type": "number", "exclusiveMinimum": 0 },
+        "resizable": { "type": "boolean" },
+        "fullscreen": { "type": "boolean" }
+      }
+    }
+  }
+}
