@@ -6,7 +6,7 @@ on:
       profile:
         description: "Profile 文件路径（相对仓库根目录）"
         required: true
-        default: "profiles/aimanju.json"
+        default: "profiles/libtv.json"
         type: string
       architecture:
         description: "目标 Windows 架构"
@@ -17,8 +17,8 @@ on:
           - x64
           - x86
   push:
-    tags:
-      - "v*"
+    branches:
+      - "main"
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: read
     env:
-      PACKAGE_PROFILE: ${{ inputs.profile || 'profiles/aimanju.json' }}
+      PACKAGE_PROFILE: ${{ inputs.profile || 'profiles/libtv.json' }}
       PACKAGE_ARCH: ${{ inputs.architecture || 'x64' }}
 
     steps:
