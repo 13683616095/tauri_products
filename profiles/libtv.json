@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/package-profile.schema.json",
+  "title": "LibTV",
+  "url": "https://www.liblib.tv/?sourceid=060360&utm_source=360sm",
+  "icon": "../img/LibTv.png",
+  "identifier": "tv.liblib.desktop",
+  "version": "0.1.0",
+  "target": "x64"
+}

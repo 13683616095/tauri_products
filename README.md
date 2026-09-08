@@ -6,7 +6,7 @@
 
 ### 1. 准备图标
 
-将产品图标放入 `profiles/icons/`。支持 `.ico` 或 `.png`；PNG 会在构建前自动转换为 Windows ICO 图标。
+将产品图标放入仓库根目录的 `img/`。支持 `.ico` 或 `.png`；PNG 会在构建前自动转换为 Windows ICO 图标。
 
 ### 2. 新建 profile
 
@@ -17,7 +17,7 @@
   "$schema": "../schemas/package-profile.schema.json",
   "title": "我的产品",
   "url": "https://example.com/path?source=desktop",
-  "icon": "icons/my-product.png",
+  "icon": "../img/my-product.png",
   "identifier": "com.example.my-product",
   "version": "0.1.0",
   "target": "x64"
@@ -30,7 +30,7 @@
 | --- | --- |
 | `title` | 1–80 个字符；将成为 EXE、窗口和安装程序名称。 |
 | `url` | 仅允许 `https://` 地址。 |
-| `icon` | 相对 profile 文件的 `.png` 或 `.ico` 路径。 |
+| `icon` | 相对 profile 文件的 `.png` 或 `.ico` 路径；当前默认放在仓库根目录的 `img/`。 |
 | `identifier` | 必填、稳定且唯一的小写反向域名，例如 `com.example.my-product`；升级同一产品时不要更改。 |
 | `version` | 语义化版本，例如 `0.1.0`。 |
 | `target` | `x64`（默认）或 `x86`。 |
