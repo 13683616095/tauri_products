@@ -65,16 +65,25 @@
 ### 3. 推送 profile 和图标
 
 ```powershell
-git add profiles
+git add profiles img .github/workflows/build-windows-x64.yml
 git commit -m "feat: add my-product packaging profile"
 git push
 ```
 
+如果新增了产品，还需要在 `.github/workflows/build-windows-x64.yml` 的 `profile.options` 中增加该 profile 路径，例如：
+
+```yaml
+options:
+  - profiles/libtv.json
+  - profiles/aimanju.json
+  - profiles/my-product.json
+```
+
 ### 4. 运行云端打包
 
-打开 GitHub 仓库的 **Actions** → **Build Windows x64 installer** → **Run workflow**：
+推送 `main` 分支后，Actions 会记录本次更新，但不会直接打包。打开 GitHub 仓库的 **Actions** → **Build Windows x64 installer** → **Run workflow**：
 
-- **profile**：填写 `profiles/my-product.json`。
+- **profile**：从下拉框选择需要打包的 profile。
 - **architecture**：默认选 `x64`；如需 32 位程序选 `x86`。
 - 点击绿色的 **Run workflow**。
 
