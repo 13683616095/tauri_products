@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { resolve } from "node:path";
+import { delimiter, resolve } from "node:path";
+import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { preparePackage } from "./prepare-package.mjs";
 
@@ -7,13 +8,17 @@ const mode = process.argv[2];
 if (!new Set(["build", "dev"]).has(mode)) throw new Error("仅支持 build 或 dev 模式");
 
 const profile = preparePackage();
-const cargoBin = `${process.env.USERPROFILE ?? ""}\\.cargo\\bin`;
-process.env.PATH = `${cargoBin};${process.env.PATH ?? ""}`;
+const cargoHome = process.env.CARGO_HOME || resolve(homedir(), ".cargo");
+const cargoBin = resolve(cargoHome, "bin");
+process.env.PATH = [cargoBin, process.env.PATH ?? ""].filter(Boolean).join(delimiter);
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const tauriCli = resolve(root, "node_modules", "@tauri-apps", "cli", "tauri.js");
 const args = [tauriCli, mode, "--config", "src-tauri/.generated/tauri.profile.conf.json"];
-if (mode === "build") args.push("--target", profile.rustTarget);
+if (mode === "build") {
+  if (process.platform === "linux") args.push("--runner", "cargo-xwin");
+  args.push("--target", profile.rustTarget);
+}
 
 console.log(`开始 ${mode}：${profile.title} / ${profile.target}`);
 console.log(`执行命令：${process.execPath} ${args.join(" ")}`);

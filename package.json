@@ -11,6 +11,7 @@
     "build-local": "node scripts/product-packager.mjs build-local",
     "build-github": "node scripts/product-packager.mjs build-github",
     "doctor": "node scripts/product-packager.mjs doctor",
+    "setup-linux-cross": "bash scripts/setup-linux-cross-build.sh",
     "agent-api": "node scripts/agent-api.mjs"
   },
   "devDependencies": {

@@ -162,11 +162,13 @@ url-exe-windows-x64-nsis
 
 当前同时支持两套构建通道：
 
-- `npm run product -- build-local --profile profiles/xxx.json --arch x64`：在 Windows 云电脑本地使用 Node.js、Rust、MSVC 和 Windows SDK 编译，直接生成 NSIS 安装包。
+- `npm run product -- build-local --profile profiles/xxx.json --arch x64`：在 Windows 上使用 MSVC/Windows SDK 原生编译，或在 Linux 上使用 `cargo-xwin`、LLVM/LLD 和 NSIS 交叉编译，直接生成 NSIS 安装包。
 - `npm run product -- build-github --profile profiles/xxx.json --arch x64 --ref main`：调用 GitHub Actions，由 `windows-latest` Runner 编译并生成 Artifact。
-- `npm run product -- doctor`：检查本地构建所需的 Node.js、npm、Rust 和 Cargo 是否可用。
+- `npm run product -- doctor`：检查本地构建工具和 Rust Windows target；Linux 还会检查 `cargo-xwin`、Clang、LLVM resource compiler、LLD 和 NSIS。
 
-AI 助手在云电脑上默认应优先使用 `build-local`；本地编译环境不可用时再使用 `build-github`。不得删除或替换 GitHub Actions 工作流。
+Linux Debian/Ubuntu 云电脑首次部署时执行 `npm run setup-linux-cross`；如需 x86，再执行 `INSTALL_X86=1 npm run setup-linux-cross`。该通道支持 Windows NSIS `.exe`，不支持 MSI。
+
+AI 助手在云电脑上应先执行 `doctor`：Windows 使用 `windows-native`，Linux 使用 `linux-cross`；只有 `localBuildReady` 为 `true` 才执行 `build-local`，环境不完整或实际构建失败时改用 `build-github`。Tauri 的 Linux 交叉编译测试覆盖少于 Windows 原生构建，因此不得删除或替换 GitHub Actions 工作流。
 
 新增产品可使用 `product add` 自动生成 profile、复制图标、更新 workflow 选项并选择性提交推送；手动编辑 JSON 时仍必须执行本文档既有校验流程。
 

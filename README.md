@@ -167,7 +167,7 @@ npm run product -- validate
 npm run product -- build --profile profiles/libtv.json --arch x64
 ```
 
-在 Windows 云电脑上直接本地构建：
+在 Windows 云电脑上原生构建，或在 Linux 云电脑上使用 `cargo-xwin` 交叉构建：
 
 ```powershell
 npm run product -- doctor
@@ -189,6 +189,48 @@ npm run product -- build-github --profile profiles/libtv.json --arch x64 --ref m
 ```
 
 `build` 默认使用本地构建；需要明确选择时可使用 `--mode local` 或 `--mode github`。两套模式互不影响：本地模式直接生成 NSIS 安装包，GitHub 模式通过 Actions 生成 Artifact。
+
+### Linux 云电脑交叉编译 Windows 安装包
+
+Linux 主机可以构建 Windows NSIS `.exe`，无需安装 Visual Studio、MSVC 或 Windows SDK。本项目在 Linux 上会自动向 Tauri CLI 传入 `--runner cargo-xwin`，使用 Windows MSVC Rust target 进行交叉编译。
+
+Debian/Ubuntu 云电脑可在仓库目录执行一键初始化：
+
+```bash
+npm run setup-linux-cross
+```
+
+脚本会安装 Clang、LLVM、LLD、NSIS，安装或复用 Rust，添加 `x86_64-pc-windows-msvc` target，安装 `cargo-xwin`，执行 `npm ci`，最后运行环境及 profile 校验。如果还要构建 x86，请使用：
+
+```bash
+INSTALL_X86=1 npm run setup-linux-cross
+```
+
+也可以手动准备环境：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential curl wget file clang llvm lld nsis
+rustup target add x86_64-pc-windows-msvc
+cargo install --locked cargo-xwin
+npm ci
+npm run doctor
+npm run product -- validate
+```
+
+环境就绪后，AI 助手或终端均可直接执行：
+
+```bash
+npm run build-local -- --profile profiles/libtv.json --arch x64
+```
+
+安装包输出到 `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/`。`npm run doctor` 返回的 `localBuildReady` 必须为 `true`；如果缺少组件，会在 `missing` 中列出。x86 构建需先安装 `i686-pc-windows-msvc` target。
+
+注意：Tauri 官方将 Linux/macOS 到 Windows 的 NSIS 交叉编译标记为可用但测试覆盖少于 Windows 原生构建；MSI 仍只能在 Windows 上生成。本项目仅生成 NSIS，若 Linux 交叉构建遇到依赖兼容问题，应保留并改用 GitHub Actions 通道：
+
+```bash
+npm run build-github -- --profile profiles/libtv.json --arch x64 --ref main
+```
 
 查询构建和下载产物：
 
@@ -228,3 +270,5 @@ POST /runs/<RUN_ID>/download?name=url-exe-windows-x64-nsis&out=artifacts/libtv.z
 ```
 
 API 默认监听 `127.0.0.1:8787`，可通过 `PACKAGER_PORT` 修改端口。它没有内置远程鉴权，不应直接暴露到公网；部署到 AI 助手实例时，应使用实例自身的安全调用机制或在反向代理层增加认证。
+
+在 Linux AI 助手实例中，推荐先执行一次 `npm run setup-linux-cross`，之后由 Skill/MCP 在项目目录调用 `npm run doctor` 和 `npm run build-local -- --profile ... --arch ...`。只有 `localBuildReady` 为 `false` 或实际构建失败时，才回退到 `build-github`；GitHub 工作流与 Linux 本地通道应同时保留。

@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workflow = "build-windows-x64.yml";
@@ -63,9 +62,10 @@ async function github(path, options, init = {}) {
 function profileFiles() {
   const directory = resolve(root, "profiles");
   if (!existsSync(directory)) return [];
-  return execFileSync(process.platform === "win32" ? "cmd.exe" : "sh",
-    process.platform === "win32" ? ["/d", "/s", "/c", "dir /b profiles\\*.json"] : ["-c", "find profiles -maxdepth 1 -name '*.json' -printf '%f\\n'"],
-    { cwd: root, encoding: "utf8" }).trim().split(/\r?\n/).filter(Boolean).map((name) => `profiles/${name}`);
+  return readdirSync(directory)
+    .filter((name) => name.toLowerCase().endsWith(".json"))
+    .sort()
+    .map((name) => `profiles/${name}`);
 }
 
 function parseJsonProfile(file) {
@@ -170,12 +170,29 @@ function runLocalBuild(profile, architecture) {
 }
 
 async function buildLocal({ profile, architecture }) {
-  if (process.platform !== "win32") fail("本地 Tauri Windows 构建必须在 Windows 云电脑上运行");
+  if (!["win32", "linux"].includes(process.platform)) {
+    fail("本地 Windows 构建仅支持 Windows 原生构建或 Linux cargo-xwin 交叉编译");
+  }
   validateProfile(profile);
+  const diagnosis = collectDoctor(architecture);
+  if (!diagnosis.localBuildReady) {
+    fail(`本地构建环境不完整，缺少：${diagnosis.missing.join(", ")}。请先执行 npm run doctor`);
+  }
   await runLocalBuild(profile, architecture);
   const rustTarget = architecture === "x86" ? "i686-pc-windows-msvc" : "x86_64-pc-windows-msvc";
   const output = resolve(root, "src-tauri", "target", rustTarget, "release", "bundle", "nsis");
-  console.log(JSON.stringify({ built: true, mode: "local", profile, architecture, output }, null, 2));
+  const installers = existsSync(output)
+    ? readdirSync(output).filter((name) => name.toLowerCase().endsWith(".exe")).map((name) => resolve(output, name))
+    : [];
+  if (installers.length === 0) fail(`构建命令已结束，但未在预期目录找到 NSIS 安装包：${output}`);
+  console.log(JSON.stringify({
+    built: true,
+    mode: process.platform === "linux" ? "linux-cross" : "windows-native",
+    profile,
+    architecture,
+    output,
+    installers
+  }, null, 2));
 }
 
 async function buildGithub({ profile, architecture, ...options }) {
@@ -187,18 +204,56 @@ async function buildGithub({ profile, architecture, ...options }) {
   console.log(JSON.stringify({ started: true, mode: "github", profile, architecture, ref: options.ref || "main", status: response.status }, null, 2));
 }
 
-async function doctor() {
-  const tools = ["node", "npm", "rustc", "cargo"];
+function findTool(tool) {
+  try {
+    return execFileSync(process.platform === "win32" ? "where.exe" : "which", [tool], { encoding: "utf8" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function installedRustTargets() {
+  try {
+    return execFileSync("rustup", ["target", "list", "--installed"], { encoding: "utf8" })
+      .trim().split(/\r?\n/).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function collectDoctor(architecture = "x64") {
+  const commonTools = ["node", "npm", "rustc", "rustup", "cargo"];
+  const platformTools = process.platform === "linux"
+    ? ["cargo-xwin", "clang", "llvm-rc", "makensis"]
+    : [];
+  const tools = [...commonTools, ...platformTools];
   const result = {};
   for (const tool of tools) {
-    try {
-      result[tool] = execFileSync(process.platform === "win32" ? "where.exe" : "which", [tool], { encoding: "utf8" }).trim();
-    } catch {
-      result[tool] = null;
-    }
+    result[tool] = findTool(tool);
   }
+  if (process.platform === "linux") {
+    result.lld = findTool("lld-link") || findTool("ld.lld") || findTool("lld");
+  }
+  result.rustTargets = result.rustup ? installedRustTargets() : [];
+  result.requiredRustTarget = architecture === "x86" ? "i686-pc-windows-msvc" : "x86_64-pc-windows-msvc";
   result.platform = process.platform;
-  result.localWindowsBuildReady = process.platform === "win32" && Boolean(result.node && result.npm && result.rustc && result.cargo);
+  result.buildMode = process.platform === "linux" ? "linux-cross" : process.platform === "win32" ? "windows-native" : "unsupported";
+  const requiredTools = process.platform === "linux"
+    ? [...tools, "lld"]
+    : process.platform === "win32"
+      ? commonTools
+      : [];
+  result.missing = requiredTools.filter((tool) => !result[tool]);
+  if (!result.rustTargets.includes(result.requiredRustTarget)) {
+    result.missing.push(`rust-target:${result.requiredRustTarget}`);
+  }
+  result.localBuildReady = requiredTools.length > 0 && result.missing.length === 0;
+  result.localWindowsBuildReady = result.localBuildReady;
+  return result;
+}
+
+async function doctor() {
+  const result = collectDoctor();
   console.log(JSON.stringify(result, null, 2));
 }
 
