@@ -3,3 +3,6 @@ src-tauri/target/
 build-stdout.log
 build-stderr.log
 src-tauri/.generated/
+artifacts/
+.codegraph/
+.wiscode/

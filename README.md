@@ -142,3 +142,89 @@ git push -u origin main
 产物包含 Windows x64 的 NSIS `.exe` 安装程序和 `SHA256SUMS.txt` 校验文件，保留 90 天。该工作流只在 GitHub 的 Windows Runner 中编译，不使用本机的 Visual Studio 或 PowerShell 环境。
 
 当前工作流只通过 **workflow_dispatch** 手动启动，不会因推送 `main` 或版本标签自动构建。这样可以确保每次构建前都能明确选择 profile 和架构。
+
+## AI/CLI 自动化能力
+
+项目提供 `product` CLI，可由 AI 助手或其他自动化程序调用。它同时支持本地云电脑构建和 GitHub Actions 远程构建。
+
+先设置环境变量：
+
+```text
+GITHUB_TOKEN=<具有 Actions 读写权限的 fine-grained token>
+GITHUB_REPOSITORY=owner/repository
+```
+
+列出和校验产品：
+
+```powershell
+npm run product -- list
+npm run product -- validate
+```
+
+触发指定 profile 的本地构建（默认）：
+
+```powershell
+npm run product -- build --profile profiles/libtv.json --arch x64
+```
+
+在 Windows 云电脑上直接本地构建：
+
+```powershell
+npm run product -- doctor
+npm run product -- build-local --profile profiles/libtv.json --arch x64
+```
+
+也可以使用快捷命令：
+
+```powershell
+npm run doctor
+npm run build-local -- --profile profiles/libtv.json --arch x64
+npm run build-github -- --profile profiles/libtv.json --arch x64 --ref main
+```
+
+继续使用 GitHub Actions 构建：
+
+```powershell
+npm run product -- build-github --profile profiles/libtv.json --arch x64 --ref main
+```
+
+`build` 默认使用本地构建；需要明确选择时可使用 `--mode local` 或 `--mode github`。两套模式互不影响：本地模式直接生成 NSIS 安装包，GitHub 模式通过 Actions 生成 Artifact。
+
+查询构建和下载产物：
+
+```powershell
+npm run product -- runs
+npm run product -- status --run <RUN_ID>
+npm run product -- download --run <RUN_ID> --name url-exe-windows-x64-nsis --out artifacts/libtv.zip
+```
+
+新增产品并自动维护 profile、图标和 workflow 选项：
+
+```powershell
+npm run product -- add --title "新产品" --url "https://example.com" --icon "img/new-product.png" --identifier "com.example.new-product" --push
+```
+
+`--push` 会提交并推送 `profiles/`、`img/` 和 workflow 文件；不带 `--push` 时只修改本地文件。
+
+### AI 助手调用接口
+
+还提供一个仅监听本机的 HTTP API：
+
+```powershell
+npm run agent-api
+```
+
+接口包括：
+
+```text
+GET  /health
+GET  /profiles
+POST /build?profile=profiles/libtv.json&arch=x64&ref=main
+POST /build/local?profile=profiles/libtv.json&arch=x64
+POST /build/github?profile=profiles/libtv.json&arch=x64&ref=main
+GET  /runs
+GET  /runs/<RUN_ID>
+POST /runs/<RUN_ID>/download?name=url-exe-windows-x64-nsis&out=artifacts/libtv.zip
+```
+
+API 默认监听 `127.0.0.1:8787`，可通过 `PACKAGER_PORT` 修改端口。它没有内置远程鉴权，不应直接暴露到公网；部署到 AI 助手实例时，应使用实例自身的安全调用机制或在反向代理层增加认证。

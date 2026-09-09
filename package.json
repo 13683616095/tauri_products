@@ -6,7 +6,12 @@
   "scripts": {
     "prepare-package": "node scripts/prepare-package.mjs",
     "dev": "node scripts/run-package.mjs dev",
-    "build": "node scripts/run-package.mjs build"
+    "build": "node scripts/run-package.mjs build",
+    "product": "node scripts/product-packager.mjs",
+    "build-local": "node scripts/product-packager.mjs build-local",
+    "build-github": "node scripts/product-packager.mjs build-github",
+    "doctor": "node scripts/product-packager.mjs doctor",
+    "agent-api": "node scripts/agent-api.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0"

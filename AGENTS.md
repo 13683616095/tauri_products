@@ -143,6 +143,33 @@ url-exe-windows-x64-nsis
 
 或 x86 对应产物。压缩包包含 Windows `.exe` 安装程序和 `SHA256SUMS.txt`。
 
+## 自动化控制器与 AI 助手集成
+
+项目提供两个 Node.js 入口：
+
+- `npm run product -- list|validate|build|runs|status|download`：CLI，调用 GitHub Actions API
+- `npm run agent-api`：仅监听 `127.0.0.1` 的 HTTP API，供 AI 助手适配器调用
+
+控制器需要环境变量 `GITHUB_TOKEN`（或 `GH_TOKEN`）和 `GITHUB_REPOSITORY=owner/repository`。Token 只能通过部署环境注入，禁止写入源码、profile、README 或日志。
+
+推荐的 AI 调用链：
+
+```text
+用户指令 → 收集/校验产品信息 → product add → git push → product build → runs/status → download
+```
+
+控制器可以调用 GitHub API，也可以直接启动本地 Tauri 构建。HTTP API 默认只绑定本机，不得直接暴露公网；部署到 `zqi-jianghe-a98e23b4` 时，应通过该实例的安全插件/适配器调用，或在反向代理层增加鉴权。
+
+当前同时支持两套构建通道：
+
+- `npm run product -- build-local --profile profiles/xxx.json --arch x64`：在 Windows 云电脑本地使用 Node.js、Rust、MSVC 和 Windows SDK 编译，直接生成 NSIS 安装包。
+- `npm run product -- build-github --profile profiles/xxx.json --arch x64 --ref main`：调用 GitHub Actions，由 `windows-latest` Runner 编译并生成 Artifact。
+- `npm run product -- doctor`：检查本地构建所需的 Node.js、npm、Rust 和 Cargo 是否可用。
+
+AI 助手在云电脑上默认应优先使用 `build-local`；本地编译环境不可用时再使用 `build-github`。不得删除或替换 GitHub Actions 工作流。
+
+新增产品可使用 `product add` 自动生成 profile、复制图标、更新 workflow 选项并选择性提交推送；手动编辑 JSON 时仍必须执行本文档既有校验流程。
+
 ## AI 执行原则
 
 - 先检查现有 profile、图标和 workflow，再进行修改
