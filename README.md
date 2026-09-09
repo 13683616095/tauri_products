@@ -83,9 +83,15 @@ options:
 
 推送 `main` 分支只会更新代码，不会自动打包。打开 GitHub 仓库的 **Actions** → **Build Windows x64 installer** → **Run workflow**：
 
-- **profile**：从下拉框选择需要打包的 profile。
-- **architecture**：默认选 `x64`；如需 32 位程序选 `x86`。
-- 点击绿色的 **Run workflow**。
+具体点击路径：
+
+1. 进入 GitHub 仓库，点击顶部的 **Actions**。
+2. 在左侧工作流列表中点击 **Build Windows x64 installer**。不要停留在 **All workflows** 总览页，也不要点击某一次历史运行记录。
+3. 进入该工作流页面后，点击右上角的 **Run workflow**。
+4. 在弹出的配置框中确认分支为 `main`。
+5. 在 **profile** 下拉框中选择需要打包的产品。
+6. 在 **architecture** 下拉框中选择 `x64` 或 `x86`。
+7. 点击配置框底部绿色的 **Run workflow**，启动构建。
 
 构建完成后，在运行记录底部下载 `url-exe-windows-x64-nsis`（或 `url-exe-windows-x86-nsis`）。其中包含安装程序和 `SHA256SUMS.txt` 校验文件；实际 EXE 文件名由 profile 的 `title`、`version` 和目标架构决定。
 

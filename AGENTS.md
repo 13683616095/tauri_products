@@ -101,6 +101,8 @@ README.md
 
 README 应明确说明：推送 `main` 只更新代码，不触发打包；需要在 GitHub Actions 中点击 **Run workflow**，选择 profile 和架构后才开始构建。
 
+README 中必须保留以下实际操作路径：进入仓库 **Actions** → 点击左侧 **Build Windows x64 installer** → 在具体工作流页面点击右上角 **Run workflow** → 在弹出的配置框中选择 `main` 分支、profile 和 architecture → 点击配置框底部绿色 **Run workflow** 启动构建。要说明不要在 **All workflows** 总览页或历史运行详情页寻找配置按钮。
+
 ### 5. 本地校验与提交
 
 至少检查：
