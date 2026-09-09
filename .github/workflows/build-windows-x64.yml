@@ -19,22 +19,9 @@ on:
         options:
           - x64
           - x86
-  push:
-    branches:
-      - "main"
-
 jobs:
-  selection-required:
-    name: Select a profile before building
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Explain how to start the build
-        run: echo "Main branch updated. Run this workflow manually and select a profile and architecture to build."
-
   build:
     name: Build selected NSIS installer
-    if: github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     permissions:
       contents: read

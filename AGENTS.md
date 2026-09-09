@@ -99,7 +99,7 @@ options:
 README.md
 ```
 
-README 应明确说明：推送 `main` 只产生更新记录，不直接打包；需要在 GitHub Actions 中点击 **Run workflow**，选择 profile 和架构后才开始构建。
+README 应明确说明：推送 `main` 只更新代码，不触发打包；需要在 GitHub Actions 中点击 **Run workflow**，选择 profile 和架构后才开始构建。
 
 ### 5. 本地校验与提交
 
@@ -124,12 +124,12 @@ git push origin main
 
 `.github/workflows/build-windows-x64.yml` 当前设计为：
 
-- `push` 到 `main`：只运行提示/校验 job，不执行产品打包
+- `push` 到 `main`：不触发 workflow
 - `workflow_dispatch`：显示 profile 和 architecture 选项，选择后执行实际构建
 - `profile`：从下拉框选择已登记的 JSON profile
 - `architecture`：选择 `x64` 或 `x86`
 
-这是因为 GitHub Actions 的 `push` 事件不能暂停等待用户输入。不能把“自动 push 触发”和“同一次运行中人工选择 profile”合并为一个原生流程。
+这是因为 GitHub Actions 的 `push` 事件不能暂停等待用户输入。当前项目选择只保留手动启动，避免推送后产生无产物的误导性运行记录。
 
 ## 构建产物
 
@@ -147,5 +147,5 @@ url-exe-windows-x64-nsis
 - 新增产品不要修改或覆盖已有产品的 `identifier`
 - 不要把生成的 `src-tauri/.generated/`、`src-tauri/target/` 或 `.codegraph/` 当作源码提交
 - 不要为了新增产品重写整个打包脚本
-- 修改 workflow 后必须检查手动输入项仍然存在，并确认自动 push 不会误打包默认 profile
+- 修改 workflow 后必须检查手动输入项仍然存在，并确认 workflow 不会因 push 自动打包默认 profile
 - 完成后向用户说明修改了哪些文件、如何提交，以及如何在 Actions 中选择并下载产物

@@ -81,7 +81,7 @@ options:
 
 ### 4. 运行云端打包
 
-推送 `main` 分支后，Actions 会记录本次更新，但不会直接打包。打开 GitHub 仓库的 **Actions** → **Build Windows x64 installer** → **Run workflow**：
+推送 `main` 分支只会更新代码，不会自动打包。打开 GitHub 仓库的 **Actions** → **Build Windows x64 installer** → **Run workflow**：
 
 - **profile**：从下拉框选择需要打包的 profile。
 - **architecture**：默认选 `x64`；如需 32 位程序选 `x86`。
@@ -116,7 +116,7 @@ src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/
 
 ## GitHub Actions 云端打包
 
-本机缺少 Windows 原生编译环境时，可将项目推送至 GitHub 后在仓库的 **Actions** 页面运行 **Build Windows x64 installer** 工作流：
+本机缺少 Windows 原生编译环境时，可将项目推送至 GitHub 后在仓库的 **Actions** 页面手动运行 **Build Windows x64 installer** 工作流：
 
 首次推送到新仓库时，在项目目录执行（将地址替换为你的仓库地址）：
 
@@ -135,9 +135,4 @@ git push -u origin main
 
 产物包含 Windows x64 的 NSIS `.exe` 安装程序和 `SHA256SUMS.txt` 校验文件，保留 90 天。该工作流只在 GitHub 的 Windows Runner 中编译，不使用本机的 Visual Studio 或 PowerShell 环境。
 
-若推送版本标签，工作流还会自动创建 GitHub Release 并上传同一份安装包：
-
-```powershell
-git tag v0.1.0
-git push origin v0.1.0
-```
+当前工作流只通过 **workflow_dispatch** 手动启动，不会因推送 `main` 或版本标签自动构建。这样可以确保每次构建前都能明确选择 profile 和架构。
