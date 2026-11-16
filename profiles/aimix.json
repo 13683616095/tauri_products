@@ -1,0 +1,9 @@
+{
+  "$schema": "../schemas/package-profile.schema.json",
+  "title": "AIMIX智剪",
+  "url": "https://web.aimix.pro/",
+  "icon": "../img/aimix.png",
+  "identifier": "pro.aimix.desktop",
+  "version": "0.1.0",
+  "target": "x64"
+}

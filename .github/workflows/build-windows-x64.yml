@@ -11,6 +11,7 @@ on:
         options:
           - profiles/libtv.json
           - profiles/aimanju.json
+          - profiles/aimix.json
       architecture:
         description: "目标 Windows 架构"
         required: true

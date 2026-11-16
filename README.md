@@ -2,6 +2,20 @@
 
 这是一个基于 Tauri 的通用线上 URL → Windows EXE 打包模板。每个产品通过独立的 `profile` 提供标题、HTTPS URL 和图标；“AI漫剧创作”仅作为示例 profile。
 
+当前可选产品：
+
+| 产品 | Profile | 线上地址 |
+| --- | --- | --- |
+| LibTV | `profiles/libtv.json` | https://www.liblib.tv/?sourceid=060360&utm_source=360sm |
+| AI漫剧创作 | `profiles/aimanju.json` | https://aimanjuzhizuo.com?ly=360 |
+| AIMIX智剪 | `profiles/aimix.json` | https://web.aimix.pro/ |
+
+AIMIX智剪使用 `img/aimix.png` 图标，稳定标识符为 `pro.aimix.desktop`，版本为 `0.1.0`，默认架构为 `x64`，沿用项目默认窗口配置。本地打包命令：
+
+```powershell
+npm run product -- build-local --profile profiles/aimix.json --arch x64
+```
+
 ## 打包新产品（推荐：GitHub Actions）
 
 ### 1. 准备图标
@@ -76,6 +90,7 @@ git push
 options:
   - profiles/libtv.json
   - profiles/aimanju.json
+  - profiles/aimix.json
   - profiles/my-product.json
 ```
 
